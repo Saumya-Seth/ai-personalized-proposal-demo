@@ -157,7 +157,7 @@ export default function ProposalMicrosite() {
             <div className="flex justify-between items-start gap-6">
               <div>
                 <div className="uppercase text-xs tracking-widest font-bold">KOLO × Reno Orthopedic Centre</div>
-                <h1 className="text-3xl md:text-4xl font-extrabold mt-3">Personalized Multiscreen Campaign — KOLO Reno</h1>
+                <h1 className="text-3xl md:text-4xl font-extrabold mt-3">Strategic Multiscreen Campaign for Reno Orthopedic Center</h1>
                 <p className="mt-3 max-w-2xl text-sm opacity-90">
                   Use KOLO's unmatched local reach across broadcast, streaming, and digital to drive patient visits, build awareness, and convert prospective patients.
                 </p>
