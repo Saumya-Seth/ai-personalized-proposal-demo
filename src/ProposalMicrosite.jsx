@@ -148,7 +148,7 @@ export default function EntravisionProposal() {
           <div className="p-8 md:p-12 text-white">
             <div className="max-w-3xl">
             <img
-  src="/src/assets/ev.png"
+  src="/ev.png"
   alt="Entravision Logo"
   className="h-12 w-auto object-contain" 
 /> 
@@ -436,7 +436,7 @@ export default function EntravisionProposal() {
                 <h4 className="text-sm font-semibold text-slate-700">Reno Media Powerhouse</h4>
 
                 <img
-    src="src/assets/channels.png"
+    src="/channels.png"
     alt="Reno Media Powerhouse"
     className="mt-3 rounded-lg w-full h-auto object-contain"
   />
