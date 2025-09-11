@@ -148,7 +148,7 @@ export default function EntravisionProposal() {
           <div className="p-8 md:p-12 text-white">
             <div className="max-w-3xl">
             <img
-  src="/ev.png"
+  src="/src/assets/ev.png"
   alt="Entravision Logo"
   className="h-12 w-auto object-contain" 
 /> 
@@ -436,7 +436,7 @@ export default function EntravisionProposal() {
                 <h4 className="text-sm font-semibold text-slate-700">Reno Media Powerhouse</h4>
 
                 <img
-    src="/channels.png"
+    src="src/assets/channels.png"
     alt="Reno Media Powerhouse"
     className="mt-3 rounded-lg w-full h-auto object-contain"
   />
@@ -590,26 +590,7 @@ export default function EntravisionProposal() {
                   </ol>
                 </div>
 
-                {/* Sample reporting mini-dashboard */}
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-3 border rounded-lg">
-                    <div className="text-xs text-gray-500">Monthly Hispanic Reach (est.)</div>
-                    <div className="text-2xl font-bold mt-2">{fmt(200000)}</div>
-                    <div className="text-xs text-gray-500 mt-1">Hispanic households in Reno DMA</div>
-                  </div>
-
-                  <div className="p-3 border rounded-lg">
-                    <div className="text-xs text-gray-500">Spanish Streaming Usage</div>
-                    <div className="text-2xl font-bold mt-2">88%</div>
-                    <div className="text-xs text-gray-500 mt-1">Streaming penetration among target demo</div>
-                  </div>
-
-                  <div className="p-3 border rounded-lg">
-                    <div className="text-xs text-gray-500">Radio Affinity</div>
-                    <div className="text-2xl font-bold mt-2">87%</div>
-                    <div className="text-xs text-gray-500 mt-1">La Tricolor weekly reach (est.)</div>
-                  </div>
-                </div>
+   
               </div>
             )}
           </section>
