@@ -1,4 +1,3 @@
-// ProposalMicrosite.jsx — KOLO × Reno Orthopedic Centre interactive proposal (JS, Tailwind + Recharts)
 import React, { useState, useMemo } from "react";
 import {
   BarChart,
@@ -18,81 +17,46 @@ import { Printer, Download } from "lucide-react";
 
 
 const BRAND = {
-  primary: "#0b336f",
-  accent: "#f3202e",
-  black: "#000000",
-  white: "#ffffff",
-  light: "#f7f9fb",
-  muted: "#6b7a90"
+  primary: "#900881", // purple
+  accent: "#f60052",  // magenta
+  dark: "#2d0030",
+  light: "#fdf2fa",
+  grey: "#6B7A90"
 };
 
-const KOLO_INSIGHTS = {
-  market: "Reno, NV (DMA)",
-  population: 752585,
-  households: 294364,
-  adults25_54_pct: 38,
-  reach_weekly_linear_hh: 120000,
-  avg_monthly_digital_uv: 850000
-};
 
-const baselineChannels = [
-  { name: "Linear TV", reach: 120000 },
-  { name: "Streaming / CTV", reach: 200000 },
-  { name: "Digital Display", reach: 150000 },
-  { name: "Geo-Fencing", reach: 52000 },
-  { name: "Paid Social", reach: 90000 }
+const baseChannels = [
+  { name: "Univision / UniMás", reach: 140000 },
+  { name: "La Tricolor Radio", reach: 120000 },
+  { name: "OTT / CTV", reach: 100000 },
+  { name: "Search & Social", reach: 85000 },
+  { name: "Creators", reach: 40000 }
 ];
 
+
 const baseInvestment = [
-  { channel: "Linear TV", pct: 35 },
-  { channel: "Streaming / CTV", pct: 30 },
-  { channel: "Display", pct: 15 },
-  { channel: "Geo-Fencing", pct: 10 },
-  { channel: "Paid Social", pct: 10 }
+  { channel: "Univision / UniMás", pct: 35 },
+  { channel: "La Tricolor Radio", pct: 20 },
+  { channel: "OTT / CTV", pct: 25 },
+  { channel: "Search & Social", pct: 15 },
+  { channel: "Creators", pct: 5 }
 ];
 
 const fmt = (n) => (typeof n === "number" ? n.toLocaleString() : n);
 
-/* tiny palette for charts */
-const CHART_COLORS = [BRAND.primary, BRAND.accent, "#0b7fbf", "#f7a23a", "#444444"];
-/* ---------- helper sample data for ZIPs, funnel, competitor ---------- */
-const zipPerformance = [
-  { zip: "89501", impressions: 54000 },
-  { zip: "89502", impressions: 47000 },
-  { zip: "89509", impressions: 39000 },
-  { zip: "89511", impressions: 32000 },
-  { zip: "89512", impressions: 28000 }
-];
-
-const appointmentFunnel = [
-  { stage: "Impressions", pct: 100 },
-  { stage: "Site Visits", pct: 18 },
-  { stage: "Calls / Forms", pct: 9 },
-  { stage: "Appointments", pct: 6 }
-];
-
-const competitorShare = [
-  { name: "KOLO", share: 48 },
-  { name: "Competitor A", share: 20 },
-  { name: "Competitor B", share: 14 },
-  { name: "Digital-only", share: 18 }
-];
-
-/* ---------- Main Component ---------- */
-export default function ProposalMicrosite() {
-  const [budget, setBudget] = useState(65000);
+export default function EntravisionProposal() {
+  const [budget, setBudget] = useState(60000);
   const [flightWeeks, setFlightWeeks] = useState(6);
-  const [audienceSplit, setAudienceSplit] = useState({
-    women3564: 50,
-    adults55plus: 30,
-    general: 20
+  const [focusSplit, setFocusSplit] = useState({
+    spanishFirst: 50,
+    bilingual: 35,
+    english: 15
   });
   const [selectedTab, setSelectedTab] = useState("overview");
 
-  // scale channel reach based on budget & flight
   const channelReach = useMemo(() => {
-    const factor = budget / 50000; // baseline $50k
-    return baselineChannels.map((c) => ({
+    const factor = budget / 50000;
+    return baseChannels.map((c) => ({
       ...c,
       reach: Math.round(c.reach * factor * (flightWeeks / 4))
     }));
@@ -107,146 +71,273 @@ export default function ProposalMicrosite() {
 
   const estimatedImpact = useMemo(() => {
     const totalImpr = channelReach.reduce((s, c) => s + c.reach, 0);
-    const impressionsPerVisit = 1100; // conservative
-    const impressionsPerPatient = 23000;
-    const visits = Math.round(totalImpr / impressionsPerVisit);
-    const patients = Math.max(0, Math.round(totalImpr / impressionsPerPatient));
+    const impressionsToVisit = 1000;
+    const impressionsToAppointment = 18000;
+    const visits = Math.round(totalImpr / impressionsToVisit);
+    const appointments = Math.round(totalImpr / impressionsToAppointment);
     const cpv = Math.round(budget / Math.max(1, visits));
-    return { totalImpr, visits, patients, cpv };
+    return { totalImpr, visits, appointments, cpv };
   }, [channelReach, budget]);
 
   const barData = channelReach.map((c) => ({ name: c.name, reach: c.reach }));
-  const audiencePie = [
-    { name: "Women 35–64", value: audienceSplit.women3564 },
-    { name: "Adults 55+", value: audienceSplit.adults55plus },
-    { name: "General", value: audienceSplit.general }
+  const pieData = [
+    { name: "Spanish-first", value: focusSplit.spanishFirst },
+    { name: "Bilingual", value: focusSplit.bilingual },
+    { name: "English-dominant", value: focusSplit.english }
   ];
+  const colors = [BRAND.primary, BRAND.accent, BRAND.grey];
+
+  function downloadPDF() {
+    window.print();
+  }
 
   function updateSplit(part, newVal) {
     newVal = Math.max(0, Math.min(100, Math.round(newVal)));
-    const otherKeys = Object.keys(audienceSplit).filter((k) => k !== part);
-    const otherTotal = otherKeys.reduce((s, k) => s + audienceSplit[k], 0);
+    const otherKeys = Object.keys(focusSplit).filter((k) => k !== part);
+    const otherTotal = otherKeys.reduce((s, k) => s + focusSplit[k], 0);
+
     if (otherTotal === 0) {
       const even = Math.round((100 - newVal) / otherKeys.length);
-      const updated = { ...audienceSplit, [part]: newVal };
-      otherKeys.forEach((k) => { updated[k] = even; });
-      return setAudienceSplit(updated);
+      const updated = { ...focusSplit, [part]: newVal };
+      otherKeys.forEach((k) => {
+        updated[k] = even;
+      });
+      return setFocusSplit(updated);
     }
+
     const remaining = 100 - newVal;
-    const updated = { ...audienceSplit, [part]: newVal };
+    const updated = { ...focusSplit, [part]: newVal };
     otherKeys.forEach((k) => {
-      updated[k] = Math.round((audienceSplit[k] / otherTotal) * remaining);
+      updated[k] = Math.round((focusSplit[k] / otherTotal) * remaining);
     });
+
     const sum = Object.values(updated).reduce((s, v) => s + v, 0);
     if (sum !== 100) {
       const diff = 100 - sum;
       updated[otherKeys[0]] = updated[otherKeys[0]] + diff;
     }
-    setAudienceSplit(updated);
+
+    setFocusSplit(updated);
   }
 
-  function downloadPDF() {
-    window.print();
-  }
+  const zipPerformance = [
+    { zip: "89502", impressions: 42000 },
+    { zip: "89506", impressions: 36000 },
+    { zip: "89512", impressions: 31000 },
+    { zip: "89431", impressions: 27000 },
+    { zip: "89509", impressions: 23000 }
+  ];
+
+  const funnelData = [
+    { stage: "Awareness", pct: 100 },
+    { stage: "Site Visits", pct: 19 },
+    { stage: "Calls/ Forms", pct: 11 },
+    { stage: "Appointment", pct: 8 }
+  ];
+
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-white text-gray-900" aria-label="Entravision CHA Proposal Microsite">
       <main className="max-w-6xl mx-auto p-6">
         {/* HERO */}
-        <header className="rounded-2xl overflow-hidden shadow-lg" style={{ background: `linear-gradient(120deg, ${BRAND.primary}, ${BRAND.black} 60%, ${BRAND.accent})` }}>
-          <div className="p-8 text-white">
-            <div className="flex justify-between items-start gap-6">
-              <div>
-                <div className="uppercase text-xs tracking-widest font-bold">KOLO × Reno Orthopedic Centre</div>
-                <h1 className="text-3xl md:text-4xl font-extrabold mt-3">Strategic Multiscreen Campaign for Reno Orthopedic Center</h1>
-                <p className="mt-3 max-w-2xl text-sm opacity-90">
-                  Use KOLO's unmatched local reach across broadcast, streaming, and digital to drive patient visits, build awareness, and convert prospective patients.
-                </p>
-                <div className="mt-4 flex gap-2 flex-wrap">
-                  <span className="px-3 py-1 rounded-full bg-white/10 text-xs">Broadcast</span>
-                  <span className="px-3 py-1 rounded-full bg-white/10 text-xs">Streaming</span>
-                  <span className="px-3 py-1 rounded-full bg-white/10 text-xs">Digital + Geo</span>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <div className="text-xs uppercase opacity-80">Prepared</div>
-                <div className="text-sm font-semibold">{new Date().toLocaleDateString()}</div>
-                <div className="mt-4 flex gap-3">
-                  <button onClick={() => setSelectedTab("overview")} className={`px-3 py-2 rounded-lg text-sm font-semibold ${selectedTab === "overview" ? "bg-white text-black" : "bg-white/10 text-white"}`}>Overview</button>
-                  <button onClick={() => setSelectedTab("plan")} className={`px-3 py-2 rounded-lg text-sm font-semibold ${selectedTab === "plan" ? "bg-white text-black" : "bg-white/10 text-white"}`}>Plan</button>
-                  <button onClick={() => setSelectedTab("measurement")} className={`px-3 py-2 rounded-lg text-sm font-semibold ${selectedTab === "measurement" ? "bg-white text-black" : "bg-white/10 text-white"}`}>Measurement</button>
-                </div>
+        <header
+  className="rounded-2xl overflow-hidden shadow-xl"
+  style={{
+    background: BRAND.primary
+  }}
+>
+          <div className="p-8 md:p-12 text-white">
+            <div className="max-w-3xl">
+            <img
+  src="/ev.png"
+  alt="Entravision Logo"
+  className="h-12 w-auto object-contain" 
+/> 
+<h1 className="font-heading text-4xl font-extrabold text-white">
+               CULTURALLY-POWERED GROWTH FOR COMMUNITY HEALTH ALLIANCE
+              </h1>
+              <p className="mt-3 text-sm md:text-base opacity-90">
+                A strategic bilingual media plan across Univision, UniMás, La Tricolor, OTT/CTV, digital, and creators—
+                built to increase appointments, preventive screenings, and community trust in Reno–Sparks.
+              </p>
+              <div className="mt-4 flex gap-2 flex-wrap">
+                <span className="inline-block bg-white/10 px-3 py-1 rounded-full text-xs">Spanish & Bilingual</span>
+                <span className="inline-block bg-white/10 px-3 py-1 rounded-full text-xs">Univision + UniMás</span>
+                <span className="inline-block bg-white/10 px-3 py-1 rounded-full text-xs">La Tricolor Radio</span>
+                <span className="inline-block bg-white/10 px-3 py-1 rounded-full text-xs">OTT / CTV</span>
               </div>
             </div>
           </div>
         </header>
-
-        {/* Main grid */}
+        {/* BODY */}
         <section className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Controls */}
-          <aside className="bg-white p-5 rounded-xl shadow-md border col-span-1">
-            <h3 className="text-lg font-semibold">Interactive Controls</h3>
-            <p className="text-sm text-gray-600 mt-2">Adjust budget & flight; charts update instantly.</p>
+          <aside className="col-span-1 bg-white p-5 rounded-xl shadow-md border border-slate-100">
+            <h3 className="text-lg font-semibold text-slate-800">Interactive Controls</h3>
+            <p className="text-sm text-slate-600 mt-2">
+              Adjust budget, flight length, and audience focus. Projections update live.
+            </p>
 
             <div className="mt-4">
-              <label className="text-sm font-medium">Budget — ${fmt(budget)}</label>
-              <input type="range" min="20000" max="300000" step="5000" value={budget} onChange={(e) => setBudget(Number(e.target.value))} className="w-full mt-2" />
-              <div className="flex justify-between text-xs text-gray-500 mt-1"><span>$20k</span><span>$300k</span></div>
+              <label className="text-sm font-medium">Campaign Budget — ${budget.toLocaleString()}</label>
+              <input
+                type="range"
+                min="20000"
+                max="200000"
+                step="5000"
+                value={budget}
+                onChange={(e) => setBudget(Number(e.target.value))}
+                className="w-full mt-3"
+              />
+              <div className="flex justify-between text-xs text-slate-500 mt-1">
+                <span>$20k</span>
+                <span>$200k</span>
+              </div>
             </div>
 
             <div className="mt-4">
-              <label className="text-sm font-medium">Flight — {flightWeeks} weeks</label>
-              <input type="range" min="2" max="20" step="1" value={flightWeeks} onChange={(e) => setFlightWeeks(Number(e.target.value))} className="w-full mt-2" />
-              <div className="flex justify-between text-xs text-gray-500 mt-1"><span>2w</span><span>20w</span></div>
+              <label className="text-sm font-medium">Flight Length — {flightWeeks} weeks</label>
+              <input
+                type="range"
+                min="2"
+                max="16"
+                step="1"
+                value={flightWeeks}
+                onChange={(e) => setFlightWeeks(Number(e.target.value))}
+                className="w-full mt-3"
+              />
+              <div className="flex justify-between text-xs text-slate-500 mt-1">
+                <span>2w</span>
+                <span>16w</span>
+              </div>
             </div>
 
             <div className="mt-4">
               <label className="text-sm font-medium">Audience Focus</label>
               <div className="mt-2 space-y-2">
                 <div>
-                  <div className="flex justify-between text-xs"><span>Women 35–55</span><strong>{audienceSplit.women3564}%</strong></div>
-                  <input type="range" min="0" max="100" value={audienceSplit.women3564} onChange={(e) => updateSplit("women3564", Number(e.target.value))} className="w-full mt-1" />
+                  <div className="flex justify-between text-xs">
+                    <span>Spanish-first</span>
+                    <strong>{focusSplit.spanishFirst}%</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={focusSplit.spanishFirst}
+                    onChange={(e) => updateSplit("spanishFirst", Number(e.target.value))}
+                    className="w-full mt-2"
+                  />
                 </div>
                 <div>
-                  <div className="flex justify-between text-xs"><span>Adults 55+</span><strong>{audienceSplit.adults55plus}%</strong></div>
-                  <input type="range" min="0" max="100" value={audienceSplit.adults55plus} onChange={(e) => updateSplit("adults55plus", Number(e.target.value))} className="w-full mt-1" />
+                  <div className="flex justify-between text-xs">
+                    <span>Bilingual</span>
+                    <strong>{focusSplit.bilingual}%</strong>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={focusSplit.bilingual}
+                    onChange={(e) => updateSplit("bilingual", Number(e.target.value))}
+                    className="w-full mt-2"
+                  />
                 </div>
               </div>
-              <div className="mt-1 text-xs text-gray-500">General: {audienceSplit.general}%</div>
+              <div className="mt-1 text-xs text-slate-500">English-dominant: {focusSplit.english}%</div>
             </div>
 
-            <div className="mt-4 flex gap-2">
-              <button onClick={downloadPDF} className="flex-1 inline-flex items-center justify-center gap-2 py-2 rounded-lg bg-gradient-to-r from-[#0b336f] to-[#000000] text-white"><Printer size={14} /> Print</button>
-              <button onClick={() => alert("Export package placeholder")} className="px-3 py-2 rounded-lg border">Export</button>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={downloadPDF}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-semibold bg-gradient-to-r from-[#910f95] to-[#f60052] text-white shadow"
+              >
+                <Printer size={16} /> Print / Save PDF
+              </button>
+              <button
+                onClick={() => alert("Download package (assets + summary) — connect backend to enable.")}
+                className="px-3 py-2 rounded-lg border border-slate-200"
+              >
+                <Download size={14} /> Export
+              </button>
             </div>
 
-            <div className="mt-4 text-xs text-gray-600 space-y-1">
-
+            <div className="mt-6 text-xs text-slate-600">
+              <div>
+                <strong>Total Impressions:</strong> {estimatedImpact.totalImpr.toLocaleString()}
+              </div>
+              <div>
+                <strong>Estimated Site Visits:</strong> {estimatedImpact.visits.toLocaleString()}
+              </div>
+              <div>
+                <strong>Estimated Appointments:</strong> {estimatedImpact.appointments.toLocaleString()}
+              </div>
+              <div>
+                <strong>Cost per Visit:</strong> ${estimatedImpact.cpv.toLocaleString()}
+              </div>
             </div>
           </aside>
 
           {/* Main content */}
-          <section className="col-span-2 bg-white p-6 rounded-xl shadow-md border">
-            {/* Tabs already shown in header; still show small nav here */}
+          <section className="col-span-2 bg-white p-6 rounded-xl shadow-md border border-slate-100">
             <nav className="flex gap-3 mb-4">
-              <button onClick={() => setSelectedTab("overview")} className={`px-3 py-1 rounded-full text-sm font-semibold ${selectedTab === "overview" ? "bg-gray-100" : "text-gray-500"}`}>Overview</button>
-              <button onClick={() => setSelectedTab("plan")} className={`px-3 py-1 rounded-full text-sm font-semibold ${selectedTab === "plan" ? "bg-gray-100" : "text-gray-500"}`}>Plan</button>
-              <button onClick={() => setSelectedTab("measurement")} className={`px-3 py-1 rounded-full text-sm font-semibold ${selectedTab === "measurement" ? "bg-gray-100" : "text-gray-500"}`}>Measurement</button>
+              <button
+                onClick={() => setSelectedTab("overview")}
+                className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  selectedTab === "overview" ? "bg-slate-100 text-slate-900" : "text-slate-500"
+                }`}
+              >
+                Overview
+              </button>
+              <button
+                onClick={() => setSelectedTab("plan")}
+                className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  selectedTab === "plan" ? "bg-slate-100 text-slate-900" : "text-slate-500"
+                }`}
+              >
+                Plan
+              </button>
+              <button
+                onClick={() => setSelectedTab("measurement")}
+                className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                  selectedTab === "measurement" ? "bg-slate-100 text-slate-900" : "text-slate-500"
+                }`}
+              >
+                Measurement
+              </button>
             </nav>
 
             {selectedTab === "overview" && (
               <div>
-                <h2 className="text-2xl font-bold">Campaign Overview</h2>
-                <p className="mt-2 text-gray-600">KOLO combines trusted local broadcast, premium streaming, and precision digital to reach decision-makers across Northern Nevada. This plan aligns KOLO’s audience strength with ROC’s service lines, appointment goals, and brand leadership.</p>
+                <h2 className="text-2xl font-bold text-slate-800">Campaign Overview</h2>
+                <p className="mt-2 text-slate-600">
+               <b>Goal: </b> Help Community Health Alliance drive appointment bookings and awareness for primary care, dental, behavioral health, women’s health, and immunizations among Hispanic families in Reno–Sparks.
+
+</p> 
+<p className="mt-2 text-slate-600"><b> Approach:</b>  Blend trusted Spanish-language TV & radio with high-precision OTT/CTV and performance digital to meet families where they watch, listen, and search—always with culturally fluent creative and measurable outcomes.
+
+
+                </p>
+
+                
 
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Audience Mix (Pie) */}
                   <div className="p-4 border rounded-lg">
-                    <h4 className="text-sm font-semibold">Audience Mix</h4>
-                    <div style={{ width: "100%", height: 260 }}>
+                  <h4 className="text-lg font-semibold">Audience Mix</h4>
+                    <div style={{ width: "100%", height: 280 }}>
                       <ResponsiveContainer>
                         <PieChart>
-                          <Pie data={audiencePie} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} label>
-                            {audiencePie.map((entry, idx) => (<Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />))}
+                          <Pie
+                            data={pieData}
+                            dataKey="value"
+                            nameKey="name"
+                            innerRadius={48}
+                            outerRadius={90}
+                            label={({ percent }) => `${Math.round(percent * 100)}%`}
+                          >
+                            {pieData.map((entry, idx) => (
+                              <Cell key={`cell-${idx}`} fill={colors[idx % colors.length]} />
+                            ))}
                           </Pie>
                           <Legend />
                           <Tooltip />
@@ -255,50 +346,63 @@ export default function ProposalMicrosite() {
                     </div>
                   </div>
 
+                  {/* Channel Reach Bar */}
                   <div className="p-4 border rounded-lg">
-                    <h4 className="text-sm font-semibold">Channel Reach (scaled)</h4>
-                    <div style={{ width: "100%", height: 260 }}>
+                  <h4 className="text-lg font-semibold">Channel Reach (scaled)</h4>
+                    <div className="text-xs text-gray-500 mt-1">Interactive: Move budget control to see effect on projected reach. Hover on bar for channel.</div>
+                    <div style={{ width: "100%", height: 240 }}>
                       <ResponsiveContainer>
-                        <BarChart data={barData} margin={{ top: 12, right: 20, left: 12, bottom: 6 }}>
+                        <BarChart data={barData} margin={{ top: 20, right: 10, left: 22, bottom: 5 }}>
                           <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                          <YAxis tickFormatter={(v) => Intl.NumberFormat().format(v)} />
-                          <Tooltip formatter={(v) => Intl.NumberFormat().format(v)} />
-                          <Bar dataKey="reach" fill={BRAND.primary} />
+                          <YAxis tickFormatter={(val) => Intl.NumberFormat().format(val)} />
+                          <Tooltip formatter={(val) => Intl.NumberFormat().format(val)} />
+                          <Bar dataKey="reach">
+                            {barData.map((entry, idx) => (
+                              <Cell key={`bar-${idx}`} fill={BRAND.accent} />
+                            ))}
+                          </Bar>
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
                   </div>
                 </div>
 
-                {/* KOLO viewership snapshot & competitor comparison */}
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <h5 className="text-sm font-semibold">KOLO Snapshot</h5>
-                    <div className="mt-3 text-2xl font-bold">{fmt(KOLO_INSIGHTS.avg_monthly_digital_uv)} UV / mo</div>
-                    <div className="text-xs text-gray-500 mt-1">Digital reach (monthly avg)</div>
-                    <div className="mt-3 text-sm">Households reachable weekly (Linear): <strong>{fmt(KOLO_INSIGHTS.reach_weekly_linear_hh)}</strong></div>
+                {/* KPIs */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="p-4 rounded-lg border">
+                    <h5 className="text-sm font-semibold">Total Impressions</h5>
+                    <div className="mt-2 text-2xl font-bold">{estimatedImpact.totalImpr.toLocaleString()}</div>
+                    <div className="text-xs text-slate-500 mt-1">Across all channels & flight.</div>
                   </div>
+                  <div className="p-4 rounded-lg border">
+                    <h5 className="text-sm font-semibold">Estimated Site Visits</h5>
+                    <div className="mt-2 text-2xl font-bold">{estimatedImpact.visits.toLocaleString()}</div>
+                    <div className="text-xs text-slate-500 mt-1">Based on modeled conversion rate.</div>
+                  </div>
+                  <div className="p-4 rounded-lg border">
+                    <h5 className="text-sm font-semibold">Estimated Appointments</h5>
+                    <div className="mt-2 text-2xl font-bold">{estimatedImpact.appointments.toLocaleString()}</div>
+                    <div className="text-xs text-slate-500 mt-1">Primary care, dental, preventive.</div>
+                  </div>
+                </div>
 
-                  <div className="col-span-2 p-4 border rounded-lg">
-                    <h5 className="text-sm font-semibold">Market Position — KOLO vs local</h5>
-                    <div style={{ width: "100%", height: 140 }} className="mt-3">
-                      <ResponsiveContainer>
-                        <BarChart data={competitorShare} margin={{ left: 0 }}>
-                          <XAxis dataKey="name" />
-                          <YAxis />
-                          <Tooltip />
-                          <Bar dataKey="share" fill={BRAND.accent} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                    <div className="text-xs text-gray-500 mt-2">KOLO leads local broadcast share — combine this with digital extensions to maximize clinic reach.</div>
-                  </div>
+
+
+
+                {/* Key Messages */}
+                <div className="mt-6 p-4 rounded-lg border">
+                  <h4 className="text-lg font-semibold">Key Messages</h4>
+                  <ul className="mt-3 list-disc ml-5 text-slate-600">
+                    <li><b>“Salud con Confianza”</b> — Healthcare your family can trust, in Spanish and English.</li>
+                    <li><b>Preventive care first:</b> immunizations, dental, behavioral health, women’s health.</li>
+                    <li><b>Community-based trust:</b> CHA clinics serving Reno–Sparks families for decades.</li>
+                  </ul>
                 </div>
 
                 {/* ZIPs + Funnel */}
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 border rounded-lg">
-                    <h5 className="text-sm font-semibold">Top ZIPs — Impressions</h5>
+                    <h4 className="text-sm font-semibold">Top ZIP Codes by Impressions</h4>
                     <div style={{ width: "100%", height: 220 }} className="mt-3">
                       <ResponsiveContainer>
                         <BarChart layout="vertical" data={zipPerformance}>
@@ -309,36 +413,56 @@ export default function ProposalMicrosite() {
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="text-xs text-gray-500 mt-2">Focus geo-fencing and linear bursts in these ZIPs to maximize visits.</div>
                   </div>
-
                   <div className="p-4 border rounded-lg">
-                    <h5 className="text-sm font-semibold">Appointment Funnel</h5>
+                    <h4 className="text-sm font-semibold">Appointment Funnel</h4>
                     <div style={{ width: "100%", height: 220 }} className="mt-3">
                       <ResponsiveContainer>
-                        <ComposedChart data={appointmentFunnel}>
+                        <ComposedChart data={funnelData}>
                           <XAxis dataKey="stage" />
                           <YAxis domain={[0, 100]} />
-                          <Tooltip />
-                          <Bar dataKey="pct" barSize={24} fill={BRAND.primary} />
-                          <Area type="monotone" dataKey="pct" stroke={BRAND.accent} fillOpacity={0.08} />
+                          <Tooltip formatter={(v) => `${v}%`} />
+                          <Bar dataKey="pct" fill={BRAND.accent} />
+                          <Area type="monotone" dataKey="pct" stroke={BRAND.primary} fillOpacity={0.06} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="text-xs text-gray-500 mt-2">Use retargeting to narrow drop-off between Visit → Appointment.</div>
                   </div>
+
+ 
+
                 </div>
+                <div className="mt-6 p-4 rounded-lg border">
+                <h4 className="text-sm font-semibold text-slate-700">Reno Media Powerhouse</h4>
+
+                <img
+    src="/channels.png"
+    alt="Reno Media Powerhouse"
+    className="mt-3 rounded-lg w-full h-auto object-contain"
+  />
+  <p className="text-xs text-slate-500 mt-2">
+    Our robust digital portfolio, three broadcast stations, and creative execution
+    provide your brand with unmatched reach and connection to Reno consumers.
+  </p>
+                </div>
+               
               </div>
+              
+
+              
             )}
+            {/* ----- Part 3: Plan, Measurement, CTA, Footer ----- */}
 
             {selectedTab === "plan" && (
               <div>
                 <h2 className="text-2xl font-bold">Recommended Media Plan</h2>
-                <p className="mt-2 text-gray-600">Video-forward allocation to drive tune-in and web traffic followed by display & geo retargeting for conversions.</p>
+                <p className="mt-2 text-slate-600">
+                  A culturally-powered, bilingual plan: blend Entravision broadcast & radio trust with OTT/CTV precision and Spanish-first digital to drive CHA appointments and preventive care.
+                </p>
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 border rounded-lg">
-                    <h4 className="text-sm font-semibold">Channel Allocations</h4>
+                    <h4 className="text-sm font-semibold">Channel Allocations (Suggested)</h4>
                     <div className="mt-3 space-y-2">
                       {investmentMix.map((r, i) => (
                         <div key={i} className="flex justify-between items-center">
@@ -347,50 +471,71 @@ export default function ProposalMicrosite() {
                         </div>
                       ))}
                     </div>
+
+                    <div className="mt-4 text-xs text-gray-600">
+                     This mix is an initial recommendation only.
+                    </div>
                   </div>
 
-                  {/* Budget breakdown pie */}
                   <div className="p-4 border rounded-lg">
                     <div className="flex items-start justify-between">
                       <div>
-                        <div className="text-sm font-semibold">Proposed Budget Allocation</div>
-                        <div className="text-xs text-gray-500 mt-1">Adjust budget to see allocation impact</div>
+                        <div className="text-sm font-semibold">Spend Mix by Channel</div>
+                      
                       </div>
                       <div className="text-sm text-gray-500">Total: <strong>${fmt(budget)}</strong></div>
                     </div>
 
-                    <div style={{ width: "100%", height: 220 }} className="mt-3">
+                    <div style={{ width: "100%", height: 290 }} className="mt-3">
                       <ResponsiveContainer>
                         <PieChart>
-                          {/* create breakdown example from investmentMix */}
                           <Pie
-                            data={investmentMix.map((m) => ({ name: m.channel, value: m.pct }))}
+                            data={investmentMix.map((m) => ({ name: m.channel, value: m.dollars }))}
                             dataKey="value"
                             nameKey="name"
                             outerRadius={80}
                             innerRadius={40}
-                            label
+                            label={({ name, percent }) => `${name} ${Math.round(percent * 100)}%`}
                           >
-                            {investmentMix.map((e, i) => (<Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />))}
+                            {investmentMix.map((e, i) => (<Cell key={i} fill={["#910f95", "#f60052", "#000000", "#6b7a90", "#8b5cf6"][i % 5]} />))}
                           </Pie>
                           <Legend />
-                          <Tooltip formatter={(v) => `${v}%`} />
+                          <Tooltip formatter={(v) => `$${Intl.NumberFormat().format(v)}`} />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
 
-                    <div className="mt-3 text-xs text-gray-500">Recommended: push video (Linear + CTV) early to generate awareness; follow with geo-targeted retargeting to convert.</div>
+                    <div className="mt-3 text-xs text-gray-600">Recommended: push linear TV + radio for mass trust and appointment awareness; OTT + search to capture intent and convert.</div>
                   </div>
                 </div>
 
                 {/* Flight & Creative */}
                 <div className="mt-6 p-4 border rounded-lg">
-                  <h4 className="text-lg font-semibold">Flight & Creative</h4>
+                  <h4 className="text-lg font-semibold">Recommended Placements and Messaging</h4>
                   <ol className="mt-3 ml-5 text-gray-600 list-decimal">
-                    <li>Production: 30s hero TV spot, 15s OTT/CTV, :06 cutdowns for social.</li>
-                    <li>Targeting: ZIP-level geofences around clinics; lookalike pools from patient lists.</li>
-                    <li>Pacing: Weekly linear bursts for tune-in; continuous OTT and display for recency.</li>
+                    <li><b> Search + Spanish Social:</b> Capture "clinica cerca de mí", "dentista económico", "vacunas para niños"; Spanish creative and appointment landing pages.</li>
+                    <li><b>Health Awareness on Univision News: </b>Weekly 15s/30s in local news + lower‑third banners. Rotate messages by service line and seasonal needs (flu, school immunizations).</li>
+                    <li><b>OTT/CTV Near‑Clinic Targeting:</b> Geo‑fence neighborhoods around CHA locations; language targeting; clear CTA to schedule online or call.</li>
+                    <li><b>La Tricolor Endorsements & Remotes:</b> On‑air talent invites families to clinics; on‑site remotes for vaccination days and dental checkups; live reads in Spanish.</li>
+                  
                   </ol>
+                </div>
+
+                {/* Deliverables / Packages */}
+                <div className="mt-6 p-4 border rounded-lg">
+                  <h4 className="text-lg font-semibold">Deliverables Snapshot</h4>
+                  <table className="w-full text-sm mt-2 border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50"><th className="p-2 text-left">Channel</th><th className="p-2 text-left">Focus</th><th className="p-2 text-left">Estimate</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td className="p-2">Univision / UniMás (KREN/KRNS)</td><td className="p-2">Trust & Mass Reach</td><td className="p-2">~100k–140k HH/week</td></tr>
+                      <tr className="bg-gray-50"><td className="p-2">La Tricolor 102.1</td><td className="p-2">On-air endorsements & remotes</td><td className="p-2">Live reads + remotes</td></tr>
+                      <tr><td className="p-2">OTT / CTV</td><td className="p-2">Geo + Language Targeting</td><td className="p-2">ZIP-level reach & VCR</td></tr>
+                      <tr className="bg-gray-50"><td className="p-2">Search & Social (Spanish)</td><td className="p-2">Intent capture & conversions</td><td className="p-2">Calls & bookings</td></tr>
+                      <tr><td className="p-2">Creators & Audio</td><td className="p-2">Cultural resonance</td><td className="p-2">Local creator content & podcasts</td></tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -398,31 +543,52 @@ export default function ProposalMicrosite() {
             {selectedTab === "measurement" && (
               <div>
                 <h2 className="text-2xl font-bold">Measurement & Reporting</h2>
-                <p className="mt-2 text-gray-600">KOLO measurement combines broadcast GRP, AudienceTrak (household match), and digital attribution to show impact on visits and conversions.</p>
+                <p className="mt-2 text-slate-600">Entravision measurement will combine broadcast reach, radio conversions, household match, digital attribution, and cohort lift for appointments.</p>
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 border rounded-lg">
-                    <h4 className="text-sm font-semibold">Live KPIs</h4>
+                  <h4 className="text-lg font-semibold"> KPIs</h4>
                     <ul className="mt-2 text-sm text-gray-600 list-disc ml-5">
-                      <li>Impressions, Reach, Frequency</li>
-                      <li>Video completion rate (VCR), CTR</li>
-                      <li>Site visits, appointment bookings, footfall</li>
+                      <li>Impressions, Reach, Frequency (by channel)</li>
+                      <li>Video completion rate (VCR), CTR, Click-to-call</li>
+                      <li>Site appointments, form fills, calls (Spanish landing pages)</li>
                     </ul>
                   </div>
 
                   <div className="p-4 border rounded-lg">
-                    <h4 className="text-sm font-semibold">Attribution & Lift</h4>
-                    <p className="text-sm text-gray-600 mt-2">We’ll run cohort lift tests around flight windows: compare exposed vs control cohorts for site visits and appointments.</p>
+                  <h4 className="text-lg font-semibold">Attribution & Lift</h4>
+                    <p className="text-sm text-gray-600 mt-2">We'll run exposed vs control cohorts by ZIP to measure incremental visits & appointments. Call tracking and appointment funnel mapping included.</p>
                   </div>
                 </div>
 
                 <div className="mt-6 p-4 border rounded-lg">
-                  <h4 className="text-sm font-semibold">Post-Campaign Deliverables</h4>
+                <h4 className="text-lg font-semibold">Post-Campaign Deliverables</h4>
                   <ol className="ml-5 list-decimal text-sm text-gray-600">
-                    <li>Executive summary and KPI results</li>
-                    <li>Creative performance with recommended optimizations</li>
-                    <li>Attribution & patient acquisition analysis</li>
+                    <li>Executive summary & KPI results (bilingual)</li>
+                    <li>Attribution & lift study: appointments & footfall</li>
+                    <li>Creative performance + optimization roadmap</li>
                   </ol>
+                </div>
+
+                {/* Sample reporting mini-dashboard */}
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-3 border rounded-lg">
+                    <div className="text-xs text-gray-500">Monthly Hispanic Reach (est.)</div>
+                    <div className="text-2xl font-bold mt-2">{fmt(200000)}</div>
+                    <div className="text-xs text-gray-500 mt-1">Hispanic households in Reno DMA</div>
+                  </div>
+
+                  <div className="p-3 border rounded-lg">
+                    <div className="text-xs text-gray-500">Spanish Streaming Usage</div>
+                    <div className="text-2xl font-bold mt-2">88%</div>
+                    <div className="text-xs text-gray-500 mt-1">Streaming penetration among target demo</div>
+                  </div>
+
+                  <div className="p-3 border rounded-lg">
+                    <div className="text-xs text-gray-500">Radio Affinity</div>
+                    <div className="text-2xl font-bold mt-2">87%</div>
+                    <div className="text-xs text-gray-500 mt-1">La Tricolor weekly reach (est.)</div>
+                  </div>
                 </div>
               </div>
             )}
@@ -432,16 +598,17 @@ export default function ProposalMicrosite() {
         {/* CTA */}
         <section className="mt-10 bg-white p-6 rounded-xl shadow-md flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-extrabold" style={{ color: BRAND.primary }}>Ready to activate KOLO for ROC?</h3>
-            <p className="text-sm text-gray-600 mt-2">Approve the plan and we’ll finalize IOs, lock inventory, and enable KOLO reporting for real-time optimization.</p>
+            <h3 className="text-2xl font-extrabold" style={{ color: "#910f95" }}>Ready to activate Entravision for Community Health Alliance?</h3>
+            <p className="text-sm text-gray-600 mt-2">Book a strategy call to get started.</p>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => alert("Schedule kickoff (placeholder)")} className="px-4 py-2 rounded-lg bg-[#0b336f] text-white">Schedule Kickoff</button>
-            <button onClick={downloadPDF} className="px-4 py-2 rounded-lg border" style={{ borderColor: BRAND.accent }}>Download PDF</button>
+            <button onClick={() => alert("Schedule kickoff (placeholder)")} className="px-4 py-2 rounded-lg" style={{ background: "#910f95", color: "#fff" }}>Schedule Kickoff</button>
+            <button onClick={downloadPDF} className="px-4 py-2 rounded-lg border" style={{ borderColor: "#f60052", color: "#f60052" }}>Save as PDF</button>
           </div>
         </section>
 
-        <footer className="mt-6 text-center text-sm text-gray-500">© KOLO — Proposal prepared for Reno Orthopedic Centre. This interactive preview is for on-screen review.</footer>
+        {/* Footer */}
+        <footer className="mt-6 text-center text-sm text-gray-500">© Entravision — Proposal prepared for Community Health Alliance.</footer>
       </main>
     </div>
   );
