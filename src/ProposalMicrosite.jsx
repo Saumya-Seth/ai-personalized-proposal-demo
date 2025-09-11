@@ -445,6 +445,26 @@ export default function EntravisionProposal() {
     provide your brand with unmatched reach and connection to Reno consumers.
   </p>
                 </div>
+
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-3 border rounded-lg">
+                    <div className="text-xs text-gray-500">Monthly Hispanic Reach (est.)</div>
+                    <div className="text-2xl font-bold mt-2">{fmt(200000)}</div>
+                    <div className="text-xs text-gray-500 mt-1">Hispanic households in Reno DMA</div>
+                  </div>
+
+                  <div className="p-3 border rounded-lg">
+                    <div className="text-xs text-gray-500">Spanish Streaming Usage</div>
+                    <div className="text-2xl font-bold mt-2">88%</div>
+                    <div className="text-xs text-gray-500 mt-1">Streaming penetration among target demo</div>
+                  </div>
+
+                  <div className="p-3 border rounded-lg">
+                    <div className="text-xs text-gray-500">Radio Affinity</div>
+                    <div className="text-2xl font-bold mt-2">87%</div>
+                    <div className="text-xs text-gray-500 mt-1">La Tricolor weekly reach (est.)</div>
+                  </div>
+                </div>
                
               </div>
               
