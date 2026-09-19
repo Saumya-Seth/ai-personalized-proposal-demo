@@ -18,7 +18,7 @@ This repo is a real sample built as part of an account-based pitch: generated fo
 
 ## How the source workflow works
 
-*(For context — the process behind this sample, not code included in this repo.)*
+*(For context; the process behind this sample, not code included in this repo.)*
 
 1. **Input:** the target account, and one real prospect of theirs to build the example around.
 2. **Research:** an AI workflow gathers structured, public information on the company: what they do, their positioning, their market, relevant context. It then identifies an account that could be a prospect for this company.
