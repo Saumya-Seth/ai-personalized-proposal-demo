@@ -12,7 +12,7 @@ The pitch isn't "here's what we could build for you." It's "here's what we alrea
 
 ## Live example
 
-This repo is a real sample built as part of an account-based pitch: generated for a prospect of the target account (Entravision), showing exactly what a personalized proposal/storefront could look like in production.
+This repo is a real sample built as part of an account-based pitch: generated for a prospect of the target account (Entravision), showing exactly what a personalized and interactive proposal could look like in production.
 
 **Live demo →** https://entravision-site.vercel.app/
 
